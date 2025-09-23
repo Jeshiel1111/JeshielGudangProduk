@@ -8,20 +8,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
-      background-color: #f4e1d2; 
+      background-color: #f4e1d2; /* krem hangat */
     }
     h1 {
-      color: #6f4e37; 
+      color: #6f4e37; /* coklat tua */
       font-weight: bold;
     }
     .card {
-      border: 2px solid #a0522d;
-      background-color: #fffaf5; 
+      border: 2px solid #a0522d; /* sienna */
+      background-color: #fffaf5; /* putih krem */
       border-radius: 12px;
       box-shadow: 0px 4px 10px rgba(111, 78, 55, 0.3);
     }
     .btn-primary {
-      background-color: #d2691e; 
+      background-color: #d2691e; /* oranye kecoklatan */
       border-color: #d2691e;
     }
     .btn-primary:hover {
@@ -29,7 +29,7 @@
       border-color: #a64712;
     }
     .btn-success {
-      background-color: #8b4513; 
+      background-color: #8b4513; /* coklat */
       border-color: #8b4513;
     }
     .btn-success:hover {
@@ -41,16 +41,16 @@
       border-color: #dc3545;
     }
     .table thead {
-      background-color: #a0522d;
+      background-color: #a0522d; /* sienna */
       color: #fff;
     }
     .table tfoot {
-      background-color: #ffe4c4; 
+      background-color: #ffe4c4; /* bisque */
       font-weight: bold;
     }
     .nama-user {
       font-weight: bold;
-      color: #6f4e37; 
+      color: #6f4e37; /* coklat */
     }
   </style>
 </head>
@@ -181,4 +181,55 @@
         <td>${item.jumlah}</td>
         <td>Rp ${item.harga.toLocaleString()}</td>
         <td>Rp ${item.subtotal.toLocaleString()}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="hapusItem(${i})">Hapus<
+        <td><button class="btn btn-danger btn-sm" onclick="hapusItem(${i})">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById("total").textContent = total.toLocaleString();
+  }
+
+  async function simpanTransaksi() {
+    if (keranjang.length === 0) {
+      Swal.fire("Oops!", "Keranjang masih kosong", "warning");
+      return;
+    }
+
+    // Simpan ke tabel penjualan
+    const { data: penjualan, error: err1 } = await db.from("penjualan").insert([{ 
+      tanggal: new Date().toISOString(), 
+      total 
+    }]).select("id").single();
+
+    if (err1) {
+      Swal.fire("Error", "Gagal simpan penjualan: " + err1.message, "error");
+      return;
+    }
+
+    let id_penjualan = penjualan.id;
+
+    // Simpan ke detail penjualan
+    let detailInsert = keranjang.map(d => ({
+      id_penjualan,
+      id_produk: d.id_produk,
+      jumlah: d.jumlah,
+      harga: d.harga,
+      subtotal: d.subtotal
+    }));
+
+    const { error: err2 } = await db.from("penjualan_detail").insert(detailInsert);
+    if (err2) {
+      Swal.fire("Error", "Gagal simpan detail: " + err2.message, "error");
+      return;
+    }
+
+    Swal.fire("Sukses", "Transaksi berhasil disimpan", "success");
+    keranjang = [];
+    total = 0;
+    renderKeranjang();
+  }
+
+  loadProduk();
+</script>
+
+</body>
+</html>
