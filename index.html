@@ -6,83 +6,24 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
-    body {
-      background: linear-gradient(to right, #ffe6cc, #ffd699);
-      font-family: 'Segoe UI', sans-serif;
-    }
-    h1 {
-      color: #6f4e37;
-      font-weight: bold;
-      text-shadow: 1px 1px 2px #fff0e6;
-    }
-    .card-produk {
-      border-radius: 15px;
-      border: none;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card-produk:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.25);
-    }
-    .btn-primary {
-      background: linear-gradient(90deg, #d2691e, #ff7f50);
-      border: none;
-      transition: 0.3s;
-    }
-    .btn-primary:hover {
-      background: linear-gradient(90deg, #b55215, #ff6347);
-    }
-    .btn-success {
-      background: linear-gradient(90deg, #8b4513, #a0522d);
-      border: none;
-      transition: 0.3s;
-    }
-    .btn-success:hover {
-      background: linear-gradient(90deg, #6b3310, #7a3f12);
-    }
-    .btn-danger {
-      transition: 0.3s;
-    }
-    .table thead {
-      background-color: #a0522d;
-      color: #fff;
-    }
-    .table tfoot {
-      background-color: #ffe4c4;
-      font-weight: bold;
-    }
-    .nama-user {
-      font-weight: bold;
-      color: #6f4e37;
-    }
-    .badge-stok {
-      font-size: 0.85rem;
-      padding: 0.4em 0.7em;
-      border-radius: 12px;
-      font-weight: 600;
-    }
-    .search-input {
-      max-width: 350px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .produk-name {
-      font-weight: bold;
-      font-size: 1rem;
-      color: #4b2e2e;
-    }
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    body { background-color: #f4e1d2; }
+    h1 { color: #6f4e37; font-weight: bold; }
+    .card { border: 2px solid #a0522d; background-color: #fffaf5; border-radius: 12px; box-shadow: 0px 4px 10px rgba(111,78,55,0.3); }
+    .btn-primary { background-color: #d2691e; border-color: #d2691e; }
+    .btn-primary:hover { background-color: #b55215; border-color: #a64712; }
+    .btn-success { background-color: #8b4513; border-color: #8b4513; }
+    .btn-success:hover { background-color: #6b3310; border-color: #5a2a0d; }
+    .btn-danger { background-color: #dc3545; border-color: #dc3545; }
+    .table thead { background-color: #a0522d; color: #fff; }
+    .table tfoot { background-color: #ffe4c4; font-weight: bold; }
+    .nama-user { font-weight: bold; color: #6f4e37; }
+    .badge-stok { font-size: 0.8rem; padding: 0.4em 0.6em; }
+    .search-input { max-width: 300px; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-<div class="container py-5">
+<div class="container py-4">
   <h1 class="mb-4 text-center">💰 Transaksi Penjualan</h1>
 
   <!-- Search -->
@@ -92,41 +33,37 @@
   <div class="row" id="produk-list"></div>
 
   <!-- Tabel Keranjang -->
-  <div class="card p-4 mt-5 shadow-sm">
-    <h4 class="mb-3">🛒 Keranjang</h4>
-    <div class="table-responsive">
-      <table class="table table-bordered align-middle">
-        <thead>
-          <tr>
-            <th>Produk</th>
-            <th>Jumlah</th>
-            <th>Harga</th>
-            <th>Subtotal</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="keranjang"></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3" class="text-end"><strong>Total</strong></td>
-            <td colspan="2"><strong>Rp <span id="total">0</span></strong></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <div class="card-footer">
-      <div class="d-flex gap-2">
-        <button class="btn btn-success" onclick="simpanTransaksi()"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
-        <button class="btn btn-danger" onclick="resetKeranjang()"><i class="fa-solid fa-trash"></i> Reset</button>
-      </div>
-      <span class="nama-user">Jeshiel Gaudete Sitompul</span>
+  <div class="card p-3 mt-4">
+    <h5>🛒 Keranjang</h5>
+    <table class="table table-bordered bg-white">
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Jumlah</th>
+          <th>Harga</th>
+          <th>Subtotal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="keranjang"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" class="text-end"><strong>Total</strong></td>
+          <td colspan="2"><strong>Rp <span id="total">0</span></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="d-flex gap-2">
+      <button class="btn btn-success" onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
+      <button class="btn btn-danger" onclick="resetKeranjang()">🗑 Reset Keranjang</button>
+      <span class="nama-user ms-auto">Jeshiel Gaudete Sitompul</span>
     </div>
   </div>
 </div>
 
 <script>
   const SUPABASE_URL = "https://rambdwebvduwxskzvxpf.supabase.co";
-  const SUPABASE_KEY = "YOUR_SUPABASE_KEY"; 
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbWJkd2VidmR1d3hza3p2eHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQ4MDEsImV4cCI6MjA3MzA0MDgwMX0.Mt9Mjw_0S8hEpIFVCTwhxxs0qifEBSTWf9jq_XMw45g"; 
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -147,25 +84,26 @@
     list.innerHTML = "";
 
     produkList.filter(p => p.nama.toLowerCase().includes(search)).forEach(p => {
+      let card = document.createElement("div");
+      card.className = "col-md-3 mb-3";
       let stokClass = p.stok <= 5 ? "badge bg-danger badge-stok" : "badge bg-success badge-stok";
-      let col = document.createElement("div");
-      col.className = "col-md-3 mb-4";
-      col.innerHTML = `
-        <div class="card card-produk p-3 h-100">
-          <h6 class="produk-name">${p.nama}</h6>
-          <p class="mb-1">Harga: <strong>Rp ${p.harga.toLocaleString()}</strong></p>
+      card.innerHTML = `
+        <div class="card p-2 h-100">
+          <h6>${p.nama}</h6>
+          <p>Harga: Rp ${p.harga.toLocaleString()}</p>
           <p>Stok: <span id="stok-${p.id}" class="${stokClass}">${p.stok}</span></p>
           <input type="number" id="qty-${p.id}" class="form-control mb-2" placeholder="Jumlah" min="1" max="${p.stok}">
-          <button class="btn btn-primary w-100" onclick="tambahDetailCard(${p.id})"><i class="fa-solid fa-cart-plus"></i> Tambah</button>
+          <button class="btn btn-primary w-100" onclick="tambahDetailCard(${p.id})">Tambah</button>
         </div>
       `;
-      list.appendChild(col);
+      list.appendChild(card);
     });
   }
 
   function tambahDetailCard(id_produk) {
     let produk = produkList.find(p => p.id === id_produk);
     let jumlah = parseInt(document.getElementById(`qty-${id_produk}`).value);
+    
     if (!jumlah || jumlah <= 0) return Swal.fire("Oops!", "Masukkan jumlah valid", "warning");
     if (jumlah > produk.stok) return Swal.fire("Oops!", `Stok hanya ${produk.stok}`, "warning");
 
@@ -186,7 +124,7 @@
         <td>${item.jumlah}</td>
         <td>Rp ${item.harga.toLocaleString()}</td>
         <td>Rp ${item.subtotal.toLocaleString()}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="hapusItem(${i})"><i class="fa-solid fa-trash"></i></button></td>
+        <td><button class="btn btn-danger btn-sm" onclick="hapusItem(${i})">Hapus</button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -216,6 +154,7 @@
     const { error: err2 } = await db.from("penjualan_detail").insert(detailInsert);
     if (err2) return Swal.fire("Error", err2.message, "error");
 
+    // Update stok produk
     for (let item of keranjang) {
       let produk = produkList.find(p => p.id === item.id_produk);
       await db.from("produk").update({ stok: produk.stok - item.jumlah }).eq("id", item.id_produk);
@@ -230,4 +169,3 @@
   loadProduk();
 </script>
 </body>
-</html>
