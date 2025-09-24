@@ -7,81 +7,33 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      background-color: #f4e1d2;
-    }
-    h1 {
-      color: #6f4e37; 
-      font-weight: bold;
-    }
-    .card {
-      border: 2px solid #a0522d; 
-      background-color: #fffaf5; 
-      border-radius: 12px;
-      box-shadow: 0px 4px 10px rgba(111, 78, 55, 0.3);
-    }
-    .btn-primary {
-      background-color: #d2691e; 
-      border-color: #d2691e;
-    }
-    .btn-primary:hover {
-      background-color: #b55215;
-      border-color: #a64712;
-    }
-    .btn-success {
-      background-color: #8b4513; 
-      border-color: #8b4513;
-    }
-    .btn-success:hover {
-      background-color: #6b3310;
-      border-color: #5a2a0d;
-    }
-    .btn-danger {
-      background-color: #dc3545;
-      border-color: #dc3545;
-    }
-    .table thead {
-      background-color: #a0522d;
-      color: #fff;
-    }
-    .table tfoot {
-      background-color: #ffe4c4; 
-      font-weight: bold;
-    }
-    .nama-user {
-      font-weight: bold;
-      color: #6f4e37; 
-    }
+    body { background-color: #f4e1d2; }
+    h1 { color: #6f4e37; font-weight: bold; }
+    .card { border: 2px solid #a0522d; background-color: #fffaf5; border-radius: 12px; box-shadow: 0px 4px 10px rgba(111,78,55,0.3); }
+    .btn-primary { background-color: #d2691e; border-color: #d2691e; }
+    .btn-primary:hover { background-color: #b55215; border-color: #a64712; }
+    .btn-success { background-color: #8b4513; border-color: #8b4513; }
+    .btn-success:hover { background-color: #6b3310; border-color: #5a2a0d; }
+    .btn-danger { background-color: #dc3545; border-color: #dc3545; }
+    .table thead { background-color: #a0522d; color: #fff; }
+    .table tfoot { background-color: #ffe4c4; font-weight: bold; }
+    .nama-user { font-weight: bold; color: #6f4e37; }
+    .badge-stok { font-size: 0.8rem; padding: 0.4em 0.6em; }
+    .search-input { max-width: 300px; margin-bottom: 1rem; }
   </style>
 </head>
-
 <body>
-
 <div class="container py-4">
   <h1 class="mb-4 text-center">💰 Transaksi Penjualan</h1>
 
-  <!-- Form Input -->
-  <div class="card p-3 mb-4">
-    <div class="row g-2 align-items-center">
-      <div class="col-md-4">
-        <select id="produk" class="form-select" onchange="tampilHarga()">
-          <option value="">Pilih Produk</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <input type="number" id="jumlah" class="form-control" placeholder="Jumlah">
-      </div>
-      <div class="col-md-2">
-        <input type="text" id="harga" class="form-control" placeholder="Harga" readonly>
-      </div>
-      <div class="col-auto">
-        <button class="btn btn-primary" onclick="tambahDetail()">Tambah</button>
-      </div>
-    </div>
-  </div>
+  <!-- Search -->
+  <input type="text" id="searchProduk" class="form-control search-input" placeholder="🔍 Cari produk..." onkeyup="renderProduk()">
+
+  <!-- Daftar Produk -->
+  <div class="row" id="produk-list"></div>
 
   <!-- Tabel Keranjang -->
-  <div class="card p-3">
+  <div class="card p-3 mt-4">
     <h5>🛒 Keranjang</h5>
     <table class="table table-bordered bg-white">
       <thead>
@@ -101,17 +53,15 @@
         </tr>
       </tfoot>
     </table>
-  </div>
-
-  <!-- Simpan -->
-  <div class="d-flex align-items-center mt-3 gap-3">
-    <button class="btn btn-success" onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
-    <span class="nama-user">Jeshiel Gaudete Sitompul</span>
+    <div class="d-flex gap-2">
+      <button class="btn btn-success" onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
+      <button class="btn btn-danger" onclick="resetKeranjang()">🗑 Reset Keranjang</button>
+      <span class="nama-user ms-auto">Jeshiel Gaudete Sitompul</span>
+    </div>
   </div>
 </div>
 
 <script>
-  // Supabase setup
   const SUPABASE_URL = "https://rambdwebvduwxskzvxpf.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbWJkd2VidmR1d3hza3p2eHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQ4MDEsImV4cCI6MjA3MzA0MDgwMX0.Mt9Mjw_0S8hEpIFVCTwhxxs0qifEBSTWf9jq_XMw45g"; 
   const { createClient } = supabase;
@@ -121,58 +71,51 @@
   let keranjang = [];
   let total = 0;
 
-  // Load Produk dari Supabase
   async function loadProduk() {
     const { data, error } = await db.from("produk").select("*").order("nama", { ascending: true });
-    if (error) {
-      Swal.fire("Error", "Gagal memuat produk: " + error.message, "error");
-      return;
-    }
+    if (error) return Swal.fire("Error", error.message, "error");
     produkList = data;
-    let select = document.getElementById("produk");
-    data.forEach(p => {
-      let opt = document.createElement("option");
-      opt.value = p.id;
-      opt.setAttribute("data-harga", p.harga);
-      opt.textContent = p.nama;
-      select.appendChild(opt);
+    renderProduk();
+  }
+
+  function renderProduk() {
+    const list = document.getElementById("produk-list");
+    const search = document.getElementById("searchProduk").value.toLowerCase();
+    list.innerHTML = "";
+
+    produkList.filter(p => p.nama.toLowerCase().includes(search)).forEach(p => {
+      let card = document.createElement("div");
+      card.className = "col-md-3 mb-3";
+      let stokClass = p.stok <= 5 ? "badge bg-danger badge-stok" : "badge bg-success badge-stok";
+      card.innerHTML = `
+        <div class="card p-2 h-100">
+          <h6>${p.nama}</h6>
+          <p>Harga: Rp ${p.harga.toLocaleString()}</p>
+          <p>Stok: <span id="stok-${p.id}" class="${stokClass}">${p.stok}</span></p>
+          <input type="number" id="qty-${p.id}" class="form-control mb-2" placeholder="Jumlah" min="1" max="${p.stok}">
+          <button class="btn btn-primary w-100" onclick="tambahDetailCard(${p.id})">Tambah</button>
+        </div>
+      `;
+      list.appendChild(card);
     });
   }
 
-  function tampilHarga() {
-    let produk = document.getElementById("produk");
-    let harga = produk.options[produk.selectedIndex].getAttribute("data-harga") || "";
-    document.getElementById("harga").value = harga;
-  }
+  function tambahDetailCard(id_produk) {
+    let produk = produkList.find(p => p.id === id_produk);
+    let jumlah = parseInt(document.getElementById(`qty-${id_produk}`).value);
+    
+    if (!jumlah || jumlah <= 0) return Swal.fire("Oops!", "Masukkan jumlah valid", "warning");
+    if (jumlah > produk.stok) return Swal.fire("Oops!", `Stok hanya ${produk.stok}`, "warning");
 
-  function tambahDetail() {
-    let produk = document.getElementById("produk");
-    let id_produk = produk.value;
-    let nama = produk.options[produk.selectedIndex].text;
-    let harga = parseFloat(document.getElementById("harga").value);
-    let jumlah = parseInt(document.getElementById("jumlah").value);
-
-    if (!id_produk || !harga || !jumlah) {
-      Swal.fire("Oops!", "Pilih produk dan isi jumlah", "warning");
-      return;
-    }
-
-    let subtotal = harga * jumlah;
-    keranjang.push({ id_produk, nama, harga, jumlah, subtotal });
+    let subtotal = produk.harga * jumlah;
+    keranjang.push({ id_produk, nama: produk.nama, harga: produk.harga, jumlah, subtotal });
     total += subtotal;
     renderKeranjang();
-
-    document.getElementById("jumlah").value = "";
-  }
-
-  function hapusItem(index) {
-    total -= keranjang[index].subtotal;
-    keranjang.splice(index, 1);
-    renderKeranjang();
+    document.getElementById(`qty-${id_produk}`).value = "";
   }
 
   function renderKeranjang() {
-    let tbody = document.getElementById("keranjang");
+    const tbody = document.getElementById("keranjang");
     tbody.innerHTML = "";
     keranjang.forEach((item, i) => {
       let tr = document.createElement("tr");
@@ -188,48 +131,42 @@
     document.getElementById("total").textContent = total.toLocaleString();
   }
 
-  async function simpanTransaksi() {
-    if (keranjang.length === 0) {
-      Swal.fire("Oops!", "Keranjang masih kosong", "warning");
-      return;
-    }
+  function hapusItem(index) {
+    total -= keranjang[index].subtotal;
+    keranjang.splice(index, 1);
+    renderKeranjang();
+  }
 
-    // Simpan ke tabel penjualan
-    const { data: penjualan, error: err1 } = await db.from("penjualan").insert([{ 
-      tanggal: new Date().toISOString(), 
-      total 
-    }]).select("id").single();
-
-    if (err1) {
-      Swal.fire("Error", "Gagal simpan penjualan: " + err1.message, "error");
-      return;
-    }
-
-    let id_penjualan = penjualan.id;
-
-    // Simpan ke detail penjualan
-    let detailInsert = keranjang.map(d => ({
-      id_penjualan,
-      id_produk: d.id_produk,
-      jumlah: d.jumlah,
-      harga: d.harga,
-      subtotal: d.subtotal
-    }));
-
-    const { error: err2 } = await db.from("penjualan_detail").insert(detailInsert);
-    if (err2) {
-      Swal.fire("Error", "Gagal simpan detail: " + err2.message, "error");
-      return;
-    }
-
-    Swal.fire("Sukses", "Transaksi berhasil disimpan", "success");
+  function resetKeranjang() {
     keranjang = [];
     total = 0;
     renderKeranjang();
   }
 
+  async function simpanTransaksi() {
+    if (keranjang.length === 0) return Swal.fire("Oops!", "Keranjang kosong", "warning");
+
+    const { data: penjualan, error: err1 } = await db.from("penjualan").insert([{ tanggal: new Date().toISOString(), total }]).select("id").single();
+    if (err1) return Swal.fire("Error", err1.message, "error");
+
+    let id_penjualan = penjualan.id;
+    let detailInsert = keranjang.map(d => ({ id_penjualan, id_produk: d.id_produk, jumlah: d.jumlah, harga: d.harga, subtotal: d.subtotal }));
+    const { error: err2 } = await db.from("penjualan_detail").insert(detailInsert);
+    if (err2) return Swal.fire("Error", err2.message, "error");
+
+    // Update stok produk
+    for (let item of keranjang) {
+      let produk = produkList.find(p => p.id === item.id_produk);
+      await db.from("produk").update({ stok: produk.stok - item.jumlah }).eq("id", item.id_produk);
+    }
+
+    Swal.fire("Sukses", "Transaksi berhasil disimpan", "success");
+    keranjang = []; total = 0;
+    renderKeranjang();
+    loadProduk();
+  }
+
   loadProduk();
 </script>
-
 </body>
 </html>
